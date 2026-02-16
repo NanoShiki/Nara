@@ -6,6 +6,7 @@
 #include "GameFramework/WorldSettings.h"
 #include "NaraWorldSettings.generated.h"
 
+class UNaraExperienceDefinition;
 /**
  * 
  */
@@ -21,6 +22,9 @@ public:
 	FPrimaryAssetId GetDefaultGameplayExperience() const;
 
 protected:
+    //该Level的默认Experience
+    UPROPERTY(EditDefaultsOnly, Category=GameMode)
+    TSoftClassPtr<UNaraExperienceDefinition> DefaultGameplayExperience;
 
 public:
 
