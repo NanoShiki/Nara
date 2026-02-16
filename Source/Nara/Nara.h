@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright NanoShiki. All Rights Reserved.
 
 #pragma once
 
