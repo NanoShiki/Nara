@@ -16,7 +16,8 @@ public class Nara : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"ModularGameplay",
-			"GameFeatures"
+			"GameFeatures",
+			"CommonLoadingScreen"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
