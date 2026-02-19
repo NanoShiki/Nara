@@ -16,6 +16,7 @@ public class Nara : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"ModularGameplay",
+			"ModularGameplayActors",
 			"GameFeatures",
 			"CommonLoadingScreen"
 		});
