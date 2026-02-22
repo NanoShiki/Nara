@@ -18,10 +18,21 @@ public class Nara : ModuleRules
 			"ModularGameplay",
 			"ModularGameplayActors",
 			"GameFeatures",
-			"CommonLoadingScreen"
+			"CommonLoadingScreen",
+			"ControlFlows",
+			"GameplayTags"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"CommonUI",
+			"CommonGame",
+			"CommonUser",
+			"UIExtension",
+			"Slate",
+			"SlateCore",
+			"UMG", 
+		});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
