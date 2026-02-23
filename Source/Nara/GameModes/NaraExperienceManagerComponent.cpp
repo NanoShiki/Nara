@@ -33,7 +33,7 @@ void UNaraExperienceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlay
 		}
 	}
 
-	if (LoadState == ENaraExperienceLoadState::Loading)
+	if (LoadState == ENaraExperienceLoadState::Loaded)
 	{
 		LoadState = ENaraExperienceLoadState::Deactivating;
 
