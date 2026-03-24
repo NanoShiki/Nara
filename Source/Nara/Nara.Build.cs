@@ -7,6 +7,13 @@ public class Nara : ModuleRules
 	public Nara(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		
+		PublicIncludePaths.AddRange(
+			new string[] {
+				"Nara"
+			}
+		);
+
 	
 		PublicDependencyModuleNames.AddRange(new string[]
 		{

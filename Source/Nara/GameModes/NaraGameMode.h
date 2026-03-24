@@ -26,6 +26,8 @@ public:
 
 	//~AGameModeBase 接口
 	UE_API virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	UE_API virtual void InitGameState() override;
+	UE_API virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	//~AGameModeBase 接口结束
 
 protected:	

@@ -15,11 +15,10 @@ class UGameUIPolicy;
 class UObject;
 
 /**
- * This manager is intended to be replaced by whatever your game needs to
- * actually create, so this class is abstract to prevent it from being created.
+ * 这个管理器旨在被你的游戏实际需要的任何内容替换，
+ * 所以这个类是抽象的，以防止它被直接创建。
  * 
- * If you just need the basic functionality you will start by sublcassing this
- * subsystem in your own game.
+ * 如果你只需要基本功能，你将从在自己的游戏中子类化这个子系统开始。
  */
 UCLASS(MinimalAPI, Abstract, config = Game)
 class UGameUIManagerSubsystem : public UGameInstanceSubsystem

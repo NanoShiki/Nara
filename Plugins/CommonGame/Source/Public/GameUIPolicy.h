@@ -14,32 +14,38 @@ class ULocalPlayer;
 class UPrimaryGameLayout;
 
 /**
- * 
+ * 本地多人游戏交互模式
  */
 UENUM()
 enum class ELocalMultiplayerInteractionMode : uint8
 {
-	// Fullscreen viewport for the primary player only, regardless of the other player's existence
+	// 仅为主玩家显示全屏视口，忽略其他玩家的存在
 	PrimaryOnly,
 
-	// Fullscreen viewport for one player, but players can swap control over who's is displayed and who's is dormant
+	// 为一个玩家显示全屏视口，但玩家可以交换控制权，决定谁显示谁处于休眠状态
 	SingleToggle,
 
-	// Viewports displayed simultaneously for both players
+	// 同时为所有玩家显示视口
 	Simultaneous
 };
 
+/**
+ * 根视口布局信息，用于跟踪本地玩家及其对应的UI布局在视口中的状态
+ */
 USTRUCT()
 struct FRootViewportLayoutInfo
 {
 	GENERATED_BODY()
 public:
+	/** 本地玩家 */
 	UPROPERTY(Transient)
 	TObjectPtr<ULocalPlayer> LocalPlayer = nullptr;
 
+	/** 该玩家的根UI布局 */
 	UPROPERTY(Transient)
 	TObjectPtr<UPrimaryGameLayout> RootLayout = nullptr;
 
+	/** 布局是否已添加到视口 */
 	UPROPERTY(Transient)
 	bool bAddedToViewport = false;
 
@@ -53,6 +59,10 @@ public:
 	bool operator==(const ULocalPlayer* OtherLocalPlayer) const { return LocalPlayer == OtherLocalPlayer; }
 };
 
+/**
+ * 游戏UI策略类，负责管理游戏中UI的整体布局和行为
+ * 定义了如何为玩家创建、管理和显示UI布局
+ */
 UCLASS(MinimalAPI, Abstract, Blueprintable, Within = GameUIManagerSubsystem)
 class UGameUIPolicy : public UObject
 {
@@ -88,11 +98,14 @@ protected:
 	UE_API TSubclassOf<UPrimaryGameLayout> GetLayoutWidgetClass(UCommonLocalPlayer* LocalPlayer);
 
 private:
+	/** 本地多人游戏交互模式 */
 	ELocalMultiplayerInteractionMode LocalMultiplayerInteractionMode = ELocalMultiplayerInteractionMode::PrimaryOnly;
 
+	/** 布局类，用于创建玩家的根UI布局 */
 	UPROPERTY(EditAnywhere)
 	TSoftClassPtr<UPrimaryGameLayout> LayoutClass;
 
+	/** 根视口布局信息数组，跟踪所有本地玩家的UI布局状态 */
 	UPROPERTY(Transient)
 	TArray<FRootViewportLayoutInfo> RootViewportLayouts;
 

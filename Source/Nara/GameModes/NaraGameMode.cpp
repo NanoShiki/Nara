@@ -27,6 +27,27 @@ void ANaraGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::HandleMatchAssignmentIfNotExpectingOne);
 }
 
+void ANaraGameMode::InitGameState()
+{
+	Super::InitGameState();
+
+	// Listen for the experience load to complete	
+	UNaraExperienceManagerComponent* ExperienceComponent = GameState->FindComponentByClass<UNaraExperienceManagerComponent>();
+	check(ExperienceComponent);
+	//加载完成后, Restart World中的所有PlayerController.
+	ExperienceComponent->CallOrRegister_OnExperienceLoaded(FOnNaraExperienceLoaded::FDelegate::CreateUObject(this, &ThisClass::OnExperienceLoaded));
+}
+
+void ANaraGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
+{
+	if (IsExperienceLoaded())
+	{
+		Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+		//Super::HandleStartingNewPlayer_Implementation本身做的事情就是调用RestartPlayer(PC);
+		//我们希望将starting new players延迟到Experience加载完成后.
+		//在OnExperienceLoaded函数中会调用RestartPlayer(PC);
+	}
+}
 void ANaraGameMode::HandleMatchAssignmentIfNotExpectingOne()
 {
 	FPrimaryAssetId ExperienceId;	// 将要加载的Experience的ExperienceId

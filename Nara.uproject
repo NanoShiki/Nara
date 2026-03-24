@@ -10,7 +10,9 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"ModularGameplay"
+				"ModularGameplay",
+				"ModularGameplayActors",
+				"CommonGame"
 			]
 		}
 	],

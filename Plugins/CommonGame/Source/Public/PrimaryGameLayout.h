@@ -21,7 +21,7 @@ class UObject;
 struct FFrame;
 
 /**
- * The state of an async load operation for the UI.
+ * UI异步加载操作的状态。
  */
 enum class EAsyncWidgetLayerState : uint8
 {
@@ -31,8 +31,8 @@ enum class EAsyncWidgetLayerState : uint8
 };
 
 /**
- * The primary game UI layout of your game.  This widget class represents how to layout, push and display all layers
- * of the UI for a single player.  Each player in a split-screen game will receive their own primary game layout.
+ * 游戏的主游戏UI布局。该控件类管理单个玩家每一层UI的布局、推送和显示。
+ * 分屏游戏中的每个玩家都将拥有自己的主游戏布局。
  */
 UCLASS(MinimalAPI, Abstract, meta = (DisableNativeTick))
 class UPrimaryGameLayout : public UCommonUserWidget
@@ -46,22 +46,28 @@ public:
 
 public:
 	UE_API UPrimaryGameLayout(const FObjectInitializer& ObjectInitializer);
-
-	/** A dormant root layout is collapsed and responds only to persistent actions registered by the owning player */
+	
+	/**
+	 * 处于Dormant(休眠状态)的RooLayout会被折叠，且仅响应所属玩家注册的持久化操作
+	 *
+	 * 当交互模式为SingleToggle时, 除当前玩家外, 其他所有玩家的RootLayout都会被设置为Dormant状态
+	 */
 	UE_API void SetIsDormant(bool Dormant);
 	bool IsDormant() const { return bIsDormant; }
 
 public:
+	//利用StreamableManager异步加载ActivatableWidgetClass，加载完成后恢复玩家输入并调用PushWidgetToLayerStack.
 	template <typename ActivatableWidgetT = UCommonActivatableWidget>
 	TSharedPtr<FStreamableHandle> PushWidgetToLayerStackAsync(FGameplayTag LayerName, bool bSuspendInputUntilComplete, TSoftClassPtr<UCommonActivatableWidget> ActivatableWidgetClass)
 	{
 		return PushWidgetToLayerStackAsync<ActivatableWidgetT>(LayerName, bSuspendInputUntilComplete, ActivatableWidgetClass, [](EAsyncWidgetLayerState, ActivatableWidgetT*) {});
 	}
 
+	//利用StreamableManager异步加载ActivatableWidgetClass，加载完成后恢复玩家输入并调用PushWidgetToLayerStack.
 	template <typename ActivatableWidgetT = UCommonActivatableWidget>
 	TSharedPtr<FStreamableHandle> PushWidgetToLayerStackAsync(FGameplayTag LayerName, bool bSuspendInputUntilComplete, TSoftClassPtr<UCommonActivatableWidget> ActivatableWidgetClass, TFunction<void(EAsyncWidgetLayerState, ActivatableWidgetT*)> StateFunc)
 	{
-		static_assert(TIsDerivedFrom<ActivatableWidgetT, UCommonActivatableWidget>::IsDerived, "Only CommonActivatableWidgets can be used here");
+		static_assert(TIsDerivedFrom<ActivatableWidgetT, UCommonActivatableWidget>::IsDerived, "只有CommonActivatableWidgets可以被使用");
 
 		static FName NAME_PushingWidgetToLayer("PushingWidgetToLayer");
 		const FName SuspendInputToken = bSuspendInputUntilComplete ? UCommonUIExtensions::SuspendInputForPlayer(GetOwningPlayer(), NAME_PushingWidgetToLayer) : NAME_None;
@@ -79,8 +85,8 @@ public:
 				StateFunc(EAsyncWidgetLayerState::AfterPush, Widget);
 			})
 		);
-
-		// Setup a cancel delegate so that we can resume input if this handler is canceled.
+		
+		//如果加载被取消，需要恢复玩家输入
 		StreamingHandle->BindCancelDelegate(FStreamableDelegate::CreateWeakLambda(this,
 			[this, StateFunc, SuspendInputToken]()
 			{
@@ -92,16 +98,25 @@ public:
 		return StreamingHandle;
 	}
 
+	/**
+	 * 将ActivatableWidgetClass添加到LayerName指定的层中.
+	 * 此方法无需传入回调函数.
+	 */
 	template <typename ActivatableWidgetT = UCommonActivatableWidget>
 	ActivatableWidgetT* PushWidgetToLayerStack(FGameplayTag LayerName, UClass* ActivatableWidgetClass)
 	{
 		return PushWidgetToLayerStack<ActivatableWidgetT>(LayerName, ActivatableWidgetClass, [](ActivatableWidgetT&) {});
 	}
-
+	
+	/**
+	 * 将ActivatableWidgetClass添加到LayerName指定的层中，并在实例生成后调用InitInstanceFunc对其进行初始化配置。
+	 *
+	 * @Param InitInstanceFunc 会在实例生成后、实际添加到容器之前被调用。因此，若你需要在实例可能被激活前对其进行初始化配置，可在InitInstanceFunc中完成相关操作。
+	 */
 	template <typename ActivatableWidgetT = UCommonActivatableWidget>
 	ActivatableWidgetT* PushWidgetToLayerStack(FGameplayTag LayerName, UClass* ActivatableWidgetClass, TFunctionRef<void(ActivatableWidgetT&)> InitInstanceFunc)
 	{
-		static_assert(TIsDerivedFrom<ActivatableWidgetT, UCommonActivatableWidget>::IsDerived, "Only CommonActivatableWidgets can be used here");
+		static_assert(TIsDerivedFrom<ActivatableWidgetT, UCommonActivatableWidget>::IsDerived, "只有CommonActivatableWidgets可以被使用");
 
 		if (UCommonActivatableWidgetContainerBase* Layer = GetLayerWidget(LayerName))
 		{
@@ -111,14 +126,14 @@ public:
 		return nullptr;
 	}
 
-	// Find the widget if it exists on any of the layers and remove it from the layer.
+	// 查找存在于任意层中的控件并将其从该层中移除。
 	UE_API void FindAndRemoveWidgetFromLayer(UCommonActivatableWidget* ActivatableWidget);
 
-	// Get the layer widget for the given layer tag.
+	// 获取给定层标签对应的层控件。
 	UE_API UCommonActivatableWidgetContainerBase* GetLayerWidget(FGameplayTag LayerName);
 
 protected:
-	/** Register a layer that widgets can be pushed onto. */
+	/** 注册一个可推送控件的层。 */
 	UFUNCTION(BlueprintCallable, Category="Layer")
 	UE_API void RegisterLayer(UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerTag, UCommonActivatableWidgetContainerBase* LayerWidget);
 	
@@ -129,11 +144,10 @@ protected:
 private:
 	bool bIsDormant = false;
 
-	// Lets us keep track of all suspended input tokens so that multiple async UIs can be loading and we correctly suspend
-	// for the duration of all of them.
+	// 用于跟踪所有挂起的输入令牌，以便在加载多个异步UI时，我们能在所有异步操作期间正确挂起输入。
 	TArray<FName> SuspendInputTokens;
 
-	// The registered layers for the primary layout.
+	// 主布局的已注册层。
 	UPROPERTY(Transient, meta = (Categories = "UI.Layer"))
 	TMap<FGameplayTag, TObjectPtr<UCommonActivatableWidgetContainerBase>> Layers;
 };
